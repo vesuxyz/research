@@ -18,16 +18,14 @@ YEAR = 365*86400
 # eligible assets
 markets = pd.DataFrame({
 	"asset": [ 
-        "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
-	    "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-	    "0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
-	    "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
         "0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8",
 	    "0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
 	    "0x68f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
-	    "0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
+	    "0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+		"0x3fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac",
+		"0x42b8f0484674ca266ac5d08e4ac6a3fe65bd3129795def2dca5c34ecc5f96d2"
     ],
-	"market": ["USDC", "ETH", "USDT", "STRK","USDC", "ETH", "USDT", "STRK"]
+	"market": ["USDC", "ETH", "USDT", "STRK", "WBTC", "wstETH"]
 })
 
 # PYTHON FUNCTION TO CONNECT TO THE POSTGRESQL DATABASE AND
@@ -77,8 +75,8 @@ data["rateAccumulator"] = data["rateAccumulator"] / SCALE
 data["reserve"] = data["reserve"] / data["scale"]
 
 # Filter markets and time window of interest
-start = pd.Timestamp("2024-08-29")
-end = pd.Timestamp("2024-09-04")
+start = pd.Timestamp("2024-07-10")
+end = pd.Timestamp("2024-09-10")
 data = data.query("date >= @start and date <= @end")
 
 print("3. Successfully transformed data")
@@ -105,18 +103,23 @@ print("4. Successfully computed variables")
 
 # resample to hourly data for plotting
 data.set_index("date", inplace=True, drop=False)
-sample = data.groupby(["market"]).resample("1H")["utilization","borrowRate"].agg("max").interpolate()
+sample = data.groupby(["market"]).resample("1H")["utilization","borrowRate"].agg("max").interpolate().reset_index()
+sample.set_index("date", inplace=True, drop=False)
 
 # utilization
 fig, ax = plt.subplots(figsize=(8,6))
 for label, df in sample.groupby('market'):
     df.utilization.plot(ax=ax, label=label)
+plt.xlabel("")
+plt.ylabel("Utilization (%)")
 plt.legend()
 
 # annualized borrow rate
 fig, ax = plt.subplots(figsize=(8,6))
 for label, df in sample.groupby('market'):
     df.borrowRate.plot(ax=ax, label=label)
+plt.xlabel("")
+plt.ylabel("Borrow Rate (%)")
 plt.legend()
 
 print("5. Successfully plotted variables")
