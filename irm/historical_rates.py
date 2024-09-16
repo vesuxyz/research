@@ -75,8 +75,8 @@ data["rateAccumulator"] = data["rateAccumulator"] / SCALE
 data["reserve"] = data["reserve"] / data["scale"]
 
 # Filter markets and time window of interest
-start = pd.Timestamp("2024-07-10")
-end = pd.Timestamp("2024-09-10")
+start = pd.to_datetime("2024-07-10")
+end = pd.to_datetime("2024-09-30")
 data = data.query("date >= @start and date <= @end")
 
 print("3. Successfully transformed data")
@@ -103,23 +103,27 @@ print("4. Successfully computed variables")
 
 # resample to hourly data for plotting
 data.set_index("date", inplace=True, drop=False)
-sample = data.groupby(["market"]).resample("1H")["utilization","borrowRate"].agg("max").interpolate().reset_index()
+sample = data.groupby(["market"]).resample("1h")["utilization","borrowRate"].agg("max").interpolate().reset_index()
 sample.set_index("date", inplace=True, drop=False)
 
 # utilization
 fig, ax = plt.subplots(figsize=(8,6))
 for label, df in sample.groupby('market'):
     df.utilization.plot(ax=ax, label=label)
+
 plt.xlabel("")
 plt.ylabel("Utilization (%)")
 plt.legend()
+plt.savefig(sample.date.min().strftime('%Y-%m-%d') + '_' + sample.date.max().strftime('%Y-%m-%d') + '_utilization.png', transparent=False)
 
 # annualized borrow rate
 fig, ax = plt.subplots(figsize=(8,6))
 for label, df in sample.groupby('market'):
     df.borrowRate.plot(ax=ax, label=label)
+
 plt.xlabel("")
 plt.ylabel("Borrow Rate (%)")
 plt.legend()
+plt.savefig(start.strftime('%Y-%m-%d') + '_' + end.strftime('%Y-%m-%d') + '_rates.png', transparent=False)
 
 print("5. Successfully plotted variables")
