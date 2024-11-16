@@ -135,7 +135,7 @@ print("3. Successfully computed variables")
 # -------------------------------------------------------
 
 # use subset to remove spikes at start and end of sample
-start = total_hourly.reset_index(drop=False).date.min() + pd.DateOffset(1)
+start = total_hourly.reset_index(drop=False).date.min() + pd.DateOffset(5)
 end = total_hourly.reset_index(drop=False).date.max() - pd.DateOffset(1)
 total_sub = total_hourly.query("date>@start and date<@end")
 
