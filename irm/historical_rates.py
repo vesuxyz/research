@@ -163,16 +163,27 @@ print("4. Successfully plotted total")
 # use subset to remove spikes at start and end of sample
 hourly_sub = data_hourly.query("date>@start and date<@end")
 
-# compute market shares
+# compute tvl market shares
 hourly_sub["total_supplied"] = hourly_sub.groupby("date")["supplied_usd"].transform(sum)
-hourly_sub["market_share"] = hourly_sub["supplied_usd"] / hourly_sub["total_supplied"]                                  
+hourly_sub["tvl_breakdown"] = hourly_sub["supplied_usd"] / hourly_sub["total_supplied"]                                  
 
 # plot stacked areas
-hourly_sub.pivot(index="date", columns="market", values="market_share").plot(
+hourly_sub.pivot(index="date", columns="market", values="tvl_breakdown").plot(
     kind="area", stacked=True, figsize=(8,6))
 plt.xlabel("")
-plt.ylabel("Market Share (%)")
-plt.savefig(start.strftime('%Y-%m-%d') + '_' + end.strftime('%Y-%m-%d') + '_market-share.png', transparent=False)
+plt.ylabel("TVL Breakdown (%)")
+plt.savefig(start.strftime('%Y-%m-%d') + '_' + end.strftime('%Y-%m-%d') + '_tvl_breakdown.png', transparent=False)
+
+# compute borrowing market shares
+hourly_sub["total_borrowed"] = hourly_sub.groupby("date")["debt_usd"].transform(sum)
+hourly_sub["borrowing_breakdown"] = hourly_sub["debt_usd"] / hourly_sub["total_borrowed"]                                  
+
+# plot stacked areas
+hourly_sub.pivot(index="date", columns="market", values="borrowing_breakdown").plot(
+    kind="area", stacked=True, figsize=(8,6))
+plt.xlabel("")
+plt.ylabel("Borrowing Breakdown (%)")
+plt.savefig(start.strftime('%Y-%m-%d') + '_' + end.strftime('%Y-%m-%d') + '_borrowing_breakdown.png', transparent=False)
 
 print("5. Successfully plotted market share")
 
